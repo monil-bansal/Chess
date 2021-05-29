@@ -4,4 +4,5 @@
 3) En - passant is not considered till now
 
 -----------------------
-#### BUT a piece can't capture a same color piece, also pieces moves according to rule -> Knight moves 2.5 squares.
+#### BUT a piece can't capture a same color piece, also pieces moves according to rule -> Knight moves 2.5 squares. 
+#### AND white and black pieces take turns
