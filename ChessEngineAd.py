@@ -33,8 +33,8 @@ class GameState():
         self.inCheck = False
         self.pins = []
         self.checks = []
-        self.checkMate = False  # include this variable later ( TODO )
-        self.staleMate = False  # include this variable later ( TODO )
+        self.checkMate = False
+        self.staleMate = False
 
         # For Enpassant
         self.enPassantPossible = ()  # sq. where enpassant capture can happen

@@ -369,7 +369,6 @@ class GameState:
     '''
 	Get all possible moves for a Bishop located at (r,c) and add the moves to the list.
 	'''
-
     def getBishopMoves(self, r, c, moves):
         directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))  # (top left) (top right) (bottom left) (bottom right)
         enemyColor = 'b' if self.whiteToMove else 'w'  # opponenet's color according to current turn
@@ -391,7 +390,6 @@ class GameState:
     '''
 	Get all possible moves for a Queen located at (r,c) and add the moves to the list.
 	'''
-
     def getQueenMoves(self, r, c, moves):
         self.getRookMoves(r, c, moves)
         self.getBishopMoves(r, c, moves)
@@ -399,7 +397,6 @@ class GameState:
     '''
 	Get all possible moves for a King located at (r,c) and add the moves to the list.
 	'''
-
     def getKingMoves(self, r, c, moves):
         directions = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
         allyColor = 'w' if self.whiteToMove else 'b'  # ally color according to current turn
@@ -414,7 +411,6 @@ class GameState:
     '''
 	Gets the list of all of the king's castling move -> for the king at(r,c);
 	'''
-
     def getCastlingMoves(self, r, c, moves):
         if self.inCheck():
             return  # can't castle when king is under attack
@@ -494,6 +490,5 @@ class Move:
     '''
 	overriding equal to method
 	'''
-
     def __eq__(self, other):
         return isinstance(other, Move) and self.moveId == other.moveId
