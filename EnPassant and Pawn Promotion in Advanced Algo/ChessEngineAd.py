@@ -130,11 +130,12 @@ class GameState():
 							validSquares.append(validSquare)
 							if validSquare[0] == checkRow and validSquare[1] == checkCol: # once you reach attacking piece stop.
 								break
-						# get rid of any move that doesn't block king or capture the piece
-						for i in range(len(moves)-1, -1, -1): 
-							if moves[i].pieceMoved[1] != 'K': #move doesn't move King so must block or Capture
-								if not (moves[i].endRow, moves[i].endCol) in validSquares:
-									moves.remove(moves[i])
+
+					# get rid of any move that doesn't block king or capture the piece
+					for i in range(len(moves)-1, -1, -1):
+						if moves[i].pieceMoved[1] != 'K': #move doesn't move King so must block or Capture
+							if not (moves[i].endRow, moves[i].endCol) in validSquares:
+								moves.remove(moves[i])
 				else: # double check -> must move king
 					self.getKingMoves(kingRow, kingCol, moves)
 
@@ -142,13 +143,13 @@ class GameState():
 			moves =  self.getAllPossibleMoves()
 
 		if len(moves) == 0:
-			if self.inCheck :
+			if self.inCheck:
 				if self.whiteToMove : 
 					print("Black Wins")
 				else: 
 					print("White Wins")
 			else:
-				print("DRAW!! -> Stalemate", end = ', ')
+				print("DRAW!! -> Stalemate", end=', ')
 				if self.whiteToMove : 
 					print("White Does Not have Moves")
 				else: 
@@ -223,7 +224,7 @@ class GameState():
 				endPiece = self.board[endRow][endCol]
 				if endPiece[0] == enemyColor and endPiece[1] == 'N' : #enemy knight attacking king
 					inCheck = True
-					checks.append((endRow, endCol, d[0], d[1]))
+					checks.append((endRow, endCol, m[0], m[1]))
 		return inCheck, pins, checks
 
 	'''
