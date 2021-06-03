@@ -562,29 +562,22 @@ class GameState():
     def getCastlingMoves(self, r, c, moves):
         if self.inCheck:
             return  # can't castle when king is under attack
-        print(1)
         if (self.whiteToMove and self.currentCastlingRights.wks) or \
                 (not self.whiteToMove and self.currentCastlingRights.bks):
-            print(2)
             self.getKingSideCastleMoves(r, c, moves)
 
         if (self.whiteToMove and self.currentCastlingRights.wqs) or \
                 (not self.whiteToMove and self.currentCastlingRights.bqs):
-            print(3)
             self.getQueenSideCastleMoves(r, c, moves)
 
     def getKingSideCastleMoves(self, r, c, moves):
         if self.board[r][c + 1] == '--' and self.board[r][c + 2] == '--':
-            print(4)
             if not self.isUnderAttack(r, c + 1) and not self.isUnderAttack(r, c + 2):
-
                 moves.append(Move((r, c), (r, c + 2), self.board, isCastleMove=True))
 
     def getQueenSideCastleMoves(self, r, c, moves):
         if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--':
-            print(6)
             if not self.isUnderAttack(r, c - 1) and not self.isUnderAttack(r, c - 2):
-                print(7)
                 moves.append(Move((r, c), (r, c - 2), self.board, isCastleMove=True))
 
     '''
