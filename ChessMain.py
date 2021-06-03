@@ -3,10 +3,13 @@ This is our main driver file. It will be responsible for
 	- handling user input
 	- displaying current GameState object
 """
-
+#Working with arguments to see which algorithm to use for the Chess Engine -> Baisc, Advances;
+import sys
 import pygame as p
-# import ChessEngineAd as ChessEngine
-import ChessEngine
+if len(sys.argv) > 1 and (sys.argv[1]).lower() == 'adv':
+	import ChessEngineAd as ChessEngine
+else:
+	import ChessEngine
 
 p.init()
 
