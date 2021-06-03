@@ -592,12 +592,62 @@ class GameState():
    '''
 
     def isUnderAttack(self, r, c):
-        self.whiteToMove = not self.whiteToMove  # switch to opponent's turn
-        opponentsMove = self.getAllPossibleMoves()  # generate opponents move
-        self.whiteToMove = not self.whiteToMove  # switch back turns
-        for move in opponentsMove:
-            if move.endRow == r and move.endCol == c:  # sq under attack
-                return True
+        #LESS OPTIMISED WAY -> generating opponent's moves and then seeing -> but not alot as max 16 opponent's piece and max 8 moves per piece -> total 128 moves -> very less for computer to calculate
+        # self.whiteToMove = not self.whiteToMove  # switch to opponent's turn
+        # opponentsMove = self.getAllPossibleMoves()  # generate opponents move
+        # self.whiteToMove = not self.whiteToMove  # switch back turns
+        # for move in opponentsMove:
+        #     if move.endRow == r and move.endCol == c:  # sq under attack
+        #         return True
+        # return False
+
+
+        #MORE OPTIMISED ALGORITHM -> only 64 + 8 -> 72 calculations
+        #here we move away from the square we want to calculate threat from
+        allyColor = 'w' if self.whiteToMove else 'b'
+        enemyColor = 'b' if self.whiteToMove else 'w'
+        directions = [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        undetAttack = False
+        for j in range(len(directions)):  # stands for direction => [0,3] -> orthogoal || [4,7] -> diagonal
+            d = directions[j]
+            for i in range(1, 8):  # stands for number of sq. away
+                endRow = r + (d[0] * i)
+                endCol = c + (d[1] * i)
+                if 0 <= endRow < 8 and 0 <= endCol < 8:
+                    endPiece = self.board[endRow][endCol]
+                    if endPiece[0] == allyColor:
+                        break
+                    elif endPiece[0] == enemyColor:
+                        pieceType = endPiece[1]
+                        # Five different possibilities here:
+                        # 1) orthogonally away Rook
+                        # 2) Diagonally away Bishop
+                        # 3) 1 sq. diagonally away Pawn
+                        # 4) Any Direction away Queen
+                        # 5) 1 sq. any direction King
+                        if (0 <= j <= 3 and pieceType == 'R') or \
+                                (4 <= j <= 7 and pieceType == 'B') or \
+                                (i == 1 and pieceType == 'P') and (
+                                (enemyColor == 'w' and 6 <= j <= 7) or (enemyColor == 'b' and 4 <= j <= 5)) or \
+                                (pieceType == 'Q') or \
+                                (i == 1 and pieceType == 'K'):
+
+                            return True
+                        else:  # enemy piece not applying check
+                            break
+                else:  # OFF BOARD
+                    break
+        if undetAttack:
+            return True
+        # CHECK FOR KNIGHT CHECKS:
+        knightMoves = [(-1, -2), (-2, -1), (1, -2), (2, -1), (1, 2), (2, 1), (-1, 2), (-2, 1)]
+        for m in knightMoves:
+            endRow = r + m[0]
+            endCol = c + m[1]
+            if 0 <= endRow <= 7 and 0 <= endCol <= 7:
+                endPiece = self.board[endRow][endCol]
+                if endPiece[0] == enemyColor and endPiece[1] == 'N':  # enemy knight attacking king
+                    return True
         return False
 
 
