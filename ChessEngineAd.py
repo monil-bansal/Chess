@@ -211,11 +211,13 @@ class GameState():
 
         if len(moves) == 0:
             if self.inCheck:
+                self.checkMate = True
                 if self.whiteToMove:
                     print("Black Wins")
                 else:
                     print("White Wins")
             else:
+                self.staleMate = True
                 print("DRAW!! -> Stalemate", end=', ')
                 if self.whiteToMove:
                     print("White Does Not have Moves")
