@@ -4,7 +4,7 @@ import random
 pieceScore = {'K': 0, "P": 1, "N": 3, "B": 3, "R": 5, "Q": 9}   #making King = 0, as no one can actually take the king
 CHECKMATE = 1000    # if you lead to checkmate you win -> hence max attainable score
 STALEMATE = 0       # If you can win(capture opponent's piece) avoid it but if you loosing(opponent can give you Checkmate) try it hence 0 and not -1000
-DEPTH = 3           # Depth for recursive calls
+DEPTH = 4           # Depth for recursive calls
 '''
     Function to calculate RANDOM move from the list of valid moves.
 '''

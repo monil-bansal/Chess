@@ -55,7 +55,10 @@ def findBestMove(gs, validMoves):
 def findBestMoveMinMax(gs, validMoves):
     global nextMove     # to find the next move
     nextMove = None
-    findMoveMinMax(gs, validMoves, DEPTH, gs.whiteToMove)
+    random.shuffle(validMoves)
+    findMoveNegaMaxAlphaBetaPruning(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)     # For using Nega Max Algorithm with Alpha Beta Pruning
+    # findMoveNegaMax(gs, validMoves, DEPTH, 1 if gs.whiteToMove else -1)     # For using Nega Max Algorithm
+    # findMoveMinMax(gs, validMoves, DEPTH, gs.whiteToMove)     # For using Min-Max Algorithm
     return nextMove
 
 '''
@@ -89,8 +92,54 @@ def findMoveMinMax(gs, validMoves, depth, whiteToMove):
                 if depth == DEPTH:
                     nextMove = move
             gs.undoMove()
-
         return minScore
+
+'''
+BEST Move calculator using NegaMax Algorithm
+'''
+def findMoveNegaMax(gs, validMoves, depth, turnMultiplier):
+    global nextMove
+    if depth == 0:
+        return turnMultiplier * boardScore(gs)
+
+    maxScore = -CHECKMATE
+    for move in validMoves:
+        gs.makeMove(move)
+        nextMoves = gs.getValidMoves()
+        score = -findMoveNegaMax(gs, nextMoves, depth-1, -turnMultiplier)   # negative for NEGA Max
+        if score > maxScore:
+            maxScore = score
+            if depth == DEPTH:
+                nextMove = move
+        gs.undoMove()
+    return score
+
+'''
+BEST Move calculator using NegaMax Algorithm along with  Alpha Beta Pruning
+'''
+def findMoveNegaMaxAlphaBetaPruning(gs, validMoves, depth, alpha, beta, turnMultiplier):
+    global nextMove
+    if depth == 0:
+        return turnMultiplier * boardScore(gs)
+
+    # Move Ordering -> (TODO)
+        # Traverse better moves 1st -> ones with checks and captures -> will lead to more pruning and more optimised algorithm
+    maxScore = -CHECKMATE
+    for move in validMoves:
+        gs.makeMove(move)
+        nextMoves = gs.getValidMoves()
+        score = -findMoveNegaMaxAlphaBetaPruning(gs, nextMoves, depth-1, -beta, -alpha, -turnMultiplier)   # negative for NEGA Max
+        if score > maxScore:
+            maxScore = score
+            if depth == DEPTH:
+                nextMove = move
+        gs.undoMove()
+        if maxScore > alpha:
+            alpha = maxScore
+        if alpha >= beta:
+            break
+    return maxScore
+
 
 '''
     better scoring algorithm with considering checks and stalemates. 
