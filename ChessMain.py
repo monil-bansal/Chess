@@ -80,7 +80,8 @@ def main():
 			#KEY HANDLERS
 			elif e.type == p.KEYDOWN:
 				if e.key == p.K_z:		#undo last move id 'z' is pressed
-					gs.undoMove() 
+					gs.undoMove()
+					gameOver = False
 					moveMade = True	 	# can do `validMoves = gs.validMoves()` but then if we change function name we will have to change the call at various places.
 				if e.key == p.K_r: 	#reset the game if 'r' is pressed
 					gs = ChessEngine.GameState()
@@ -93,7 +94,7 @@ def main():
 
 		# AI Move finder logic
 		if not gameOver and not humanTurn:
-			AIMove = ChessBot.findBestMove(gs, validMoves)
+			AIMove = ChessBot.findBestMoveMinMax(gs, validMoves)
 			if AIMove is None:		# If AI can't find any move -> if any move will lead to opponent giving a checkmate.
 				AIMove = ChessBot.findRandomMove(validMoves)
 			gs.makeMove(AIMove)

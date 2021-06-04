@@ -44,6 +44,10 @@ class GameState:
             CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.wqs,  # correct way
                          self.currentCastlingRights.bks, self.currentCastlingRights.bqs)]
 
+        # Reset Checkmate and Stalemate
+        self.checkMate = False
+        self.staleMate = False
+
     '''
 	A function to move pieces on the board and record them. (Won't work for castling, pawn-promotion and en-passant)
 	'''
@@ -191,6 +195,9 @@ class GameState:
             else:
                 print("DRAW DUE TO STALEMATE")
                 self.staleMate = True
+        else:
+            self.checkMate = False
+            self.staleMate = False
 
         self.enPassantPossible = tempEnPassant
         self.currentCastlingRights = tempCastlingRights

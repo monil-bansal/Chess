@@ -148,6 +148,11 @@ class GameState():
 				self.board[move.endRow][move.endCol - 1] = '--'
 				self.board[move.endRow][7] = move.pieceMoved[0] + 'R'
 
+		# Set checkmate and stalemate false again
+		self.checkMate = False
+		self.staleMate = False
+
+
 	'''
 	   Updating Castling Right given a Move -> -> when it's a Rook or a King Move
 	   '''
@@ -235,7 +240,9 @@ class GameState():
 					print("White Does Not have Moves")
 				else:
 					print("Black Does Not have Moves")
-
+		else:
+			self.staleMate = False
+			self.checkMate = False
 		self.currentCastlingRights = tempCastlingRights
 
 		# get Castling Moves
