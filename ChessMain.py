@@ -70,7 +70,7 @@ def main():
 									gs.makeMove(validMoves[i])
 									moveMade = True
 									animate = True
-									playerClicks = [] 	# reset platerClicks
+									playerClicks = [] 	# reset playerClicks
 									sqSelected = () 	# reset user clicks
 							if not moveMade:
 								playerClicks = [sqSelected]
@@ -106,6 +106,7 @@ def main():
 				animateMove(gs.moveLog[-1], screen, gs.board, clock)
 			validMoves = gs.getValidMoves()
 			moveMade = False
+
 		drawGameState(screen, gs, sqSelected, validMoves)
 
 		if gs.checkMate:
@@ -117,7 +118,8 @@ def main():
 
 		if gs.staleMate:
 			gameOver = True
-			drawText(screen, "Draw due to Stalemate!");
+			drawText(screen, "Draw due to Stalemate!")
+
 		clock.tick(MAX_FPS) 
 		p.display.flip()
 
@@ -151,9 +153,9 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 responsible for all the graphics in the game
 '''
 def drawGameState(screen, gs, selectedSquare, validMoves):
-	drawBoard(screen) #draw squares on board (should be called before drawing anything else)
+	drawBoard(screen) 	#draw squares on board (should be called before drawing anything else)
 	highlightSquares(screen, gs, selectedSquare, validMoves)
-	drawPieces(screen, gs.board) #draw pieces on the board
+	drawPieces(screen, gs.board) 	#draw pieces on the board
 
 
 '''
