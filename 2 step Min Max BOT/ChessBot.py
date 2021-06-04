@@ -9,7 +9,6 @@ STALEMATE = 0       # If you can win(capture opponent's piece) avoid it but if y
     Function to calculate RANDOM move from the list of valid moves.
 '''
 def findRandomMove(validMoves):
-    print(123123123123123123)
     if len(validMoves) > 0:
         return validMoves[random.randint(0, len(validMoves) - 1)]
 
@@ -24,12 +23,14 @@ def findBestMove(gs, validMoves):
     random.shuffle(validMoves)
     for playerMove in validMoves:   # not assigning colors so AI can play as both: playerMove -> move of the current player || opponentMove -> opponent's move
         gs.makeMove(playerMove)
-        gs.getValidMoves()
-        if gs.checkMate:
-            return playerMove
-        opponentMoves = gs.getValidMoves()
-        random.shuffle(opponentMoves)
         opponentMinScore = CHECKMATE
+        opponentMoves = gs.getValidMoves()
+        if gs.checkMate:
+            gs.undoMove()
+            return playerMove
+        wasStalemate = False
+        if gs.staleMate:
+            wasStalemate = True
         for opponentMove in opponentMoves:
             gs.makeMove(opponentMove)
             gs.getValidMoves()
@@ -42,7 +43,8 @@ def findBestMove(gs, validMoves):
             if score < opponentMinScore:
                 opponentMinScore = score
             gs.checkMate = False
-            gs.staleMate = False
+            if not wasStalemate:
+                gs.staleMate = False
             gs.undoMove()
         if playerMaxScore < opponentMinScore:
             playerMaxScore = opponentMinScore
