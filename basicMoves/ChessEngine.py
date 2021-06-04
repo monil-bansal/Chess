@@ -26,9 +26,9 @@ class GameState():
 
 	def makeMove(self, move):
 		self.board[move.startRow][move.startCol] = '--'  # empty the start cell 
-		self.board[move.endRow][move.endCol] = move.pieceMoved # keep the piece moved on the end cell
-		self.moveLog.append(move) # record the move
-		self.whiteToMove = not self.whiteToMove # swap the turn 
+		self.board[move.endRow][move.endCol] = move.pieceMoved 	# keep the piece moved on the end cell
+		self.moveLog.append(move) 	# record the move
+		self.whiteToMove = not self.whiteToMove	 # swap the turn
 
 class Move():
 
