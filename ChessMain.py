@@ -185,7 +185,7 @@ def animateMove(move, screen, board, clock):
 	global colors
 	dR = move.endRow - move.startRow
 	dC = move.endCol - move.startCol
-	framesPerSquare = 5		# frames to move 1 square
+	framesPerSquare = 3		# frames to move 1 square
 	frameCount = (abs(dR) + abs(dC)) * framesPerSquare
 	for frame in range(frameCount + 1):
 		r, c = (move.startRow + dR*frame/frameCount, move.startCol + dC*frame/frameCount)
