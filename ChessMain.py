@@ -113,17 +113,41 @@ def main():
 		if gs.checkMate:
 			gameOver = True
 			if gs.whiteToMove:
-				drawText(screen, "Black Won by Checkmate!");
+				drawEndGameText(screen, "Black Won by Checkmate!");
 			else:
-				drawText(screen, "White Won by Checkmate!");
+				drawEndGameText(screen, "White Won by Checkmate!");
 
 		if gs.staleMate:
 			gameOver = True
-			drawText(screen, "Draw due to Stalemate!")
+			drawEndGameText(screen, "Draw due to Stalemate!")
 
 		clock.tick(MAX_FPS) 
 		p.display.flip()
 
+
+'''
+responsible for all the graphics in the game
+'''
+def drawGameState(screen, gs, selectedSquare, validMoves):
+	drawBoard(screen) 	#draw squares on board (should be called before drawing anything else)
+	highlightSquares(screen, gs, selectedSquare, validMoves)
+	if len(gs.moveLog) > 0:
+		highlightLastMove(screen, gs.moveLog[-1])
+	drawPieces(screen, gs.board) 	#draw pieces on the board
+
+'''
+Highlight the last move
+'''
+def highlightLastMove(screen, move):
+	startRow = move.startRow
+	startCol = move.startCol
+	endRow = move.endRow
+	endCol = move.endCol
+	s = p.Surface((SQ_SIZE, SQ_SIZE))
+	s.set_alpha(100)
+	s.fill(p.Color("pink"))
+	screen.blit(s, (startCol * SQ_SIZE, startRow * SQ_SIZE))
+	screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
 
 '''
 For highlighting the correct sq. of selected piece and the squares it can move to
@@ -149,16 +173,6 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 					if gs.board[endRow][endCol] == '--' or gs.board[endRow][endCol][0] == enemyColor:
 						screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
 
-
-'''
-responsible for all the graphics in the game
-'''
-def drawGameState(screen, gs, selectedSquare, validMoves):
-	drawBoard(screen) 	#draw squares on board (should be called before drawing anything else)
-	highlightSquares(screen, gs, selectedSquare, validMoves)
-	drawPieces(screen, gs.board) 	#draw pieces on the board
-
-
 '''
 draw the squares on the board
 '''
@@ -169,7 +183,6 @@ def drawBoard(screen):
 		for c in range(DIMENTION):
 			color = colors[(r+c)%2]
 			p.draw.rect(screen, color, p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
-
 
 
 '''
@@ -213,7 +226,7 @@ def animateMove(move, screen, board, clock):
 '''
 To wrtie some text in the middle of the screen!
 '''
-def drawText(screen, text):
+def drawEndGameText(screen, text):
 						#  Font Name  Size Bold  Italics
 	font = p.font.SysFont("Helvitica", 32, True, False);
 	textObject = font.render(text, 0, p.Color('Blue'))
