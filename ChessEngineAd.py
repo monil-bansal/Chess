@@ -158,6 +158,7 @@ class GameState():
 	   '''
 
 	def updateCastlingRights(self, move):
+		# IF KING OR ROOK IS MOVED
 		if move.pieceMoved == 'wK':
 			self.currentCastlingRights.wqs = False
 			self.currentCastlingRights.wks = False
@@ -177,6 +178,20 @@ class GameState():
 				self.currentCastlingRights.bqs = False
 			if move.startRow == 0 and move.startCol == 7:
 				self.currentCastlingRights.bks = False
+
+		# IF ROOK IS CAPTURED
+		if move.pieceCaptured == 'wR':
+			if move.endRow == 7:
+				if move.endCol == 0:
+					self.currentCastlingRights.wqs = False
+				elif move.endCol == 7:
+					self.currentCastlingRights.wks = False
+		if move.pieceCaptured == 'bR':
+			if move.endRow == 0:
+				if move.endCol == 0:
+					self.currentCastlingRights.bqs = False
+				elif move.endCol == 7:
+					self.currentCastlingRights.bks = False
 
 	''' 
 	Get a list of all the valid moves -> the moves that user can actually make. => Considering CHECKS.
