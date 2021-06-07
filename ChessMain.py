@@ -13,11 +13,14 @@ else:
 import ChessBot
 p.init()
 
-WIDTH = HEIGHT = 480
+BOARD_WIDTH = BOARD_HEIGHT = 480
+MOVE_LOG_PANNEL_WIDTH = 250
+MOVE_LOG_PANNEL_HEIGHT = BOARD_HEIGHT
 DIMENTION = 8	 # 8*8 CHESS BOARD
-SQ_SIZE = HEIGHT // DIMENTION
+SQ_SIZE = BOARD_HEIGHT // DIMENTION
 MAX_FPS = 15
 IMAGES = {}
+MOVE_LOG_FONT = p.font.SysFont('Arial', 12, False, False)
  
 '''
 Initialise the global dictionary of images. This will be called exactly once in the main
@@ -32,7 +35,7 @@ def loadImages():
 This will be out main driver. It will handle user input and update the graphics.
 '''
 def main():
-	screen = p.display.set_mode((WIDTH, HEIGHT))
+	screen = p.display.set_mode((BOARD_WIDTH + MOVE_LOG_PANNEL_WIDTH, BOARD_HEIGHT))
 	clock = p.time.Clock()
 	screen.fill(p.Color('white'))
 	gs = ChessEngine.GameState()
@@ -57,6 +60,8 @@ def main():
 					location = p.mouse.get_pos()	 # (x,y) position of mouse
 					col = location[0]//SQ_SIZE
 					row = location[1]//SQ_SIZE
+					if(col >= 8): 	# Click out of board (on move log panel) -> do nothing
+						continue
 					if sqSelected == (row, col): 	# user selected the same sq. twice -> deselect the selecion
 						sqSelected = ()
 						playerClicks = []
@@ -110,6 +115,7 @@ def main():
 
 		drawGameState(screen, gs, sqSelected, validMoves)
 
+		#Print Checkmate
 		if gs.checkMate:
 			gameOver = True
 			if gs.whiteToMove:
@@ -117,6 +123,7 @@ def main():
 			else:
 				drawEndGameText(screen, "White Won by Checkmate!");
 
+		#Print Stalmate
 		if gs.staleMate:
 			gameOver = True
 			drawEndGameText(screen, "Draw due to Stalemate!")
@@ -134,20 +141,17 @@ def drawGameState(screen, gs, selectedSquare, validMoves):
 	if len(gs.moveLog) > 0:
 		highlightLastMove(screen, gs.moveLog[-1])
 	drawPieces(screen, gs.board) 	#draw pieces on the board
-
+	drawMoveLog(screen, gs)
 '''
-Highlight the last move
+draw the squares on the board
 '''
-def highlightLastMove(screen, move):
-	startRow = move.startRow
-	startCol = move.startCol
-	endRow = move.endRow
-	endCol = move.endCol
-	s = p.Surface((SQ_SIZE, SQ_SIZE))
-	s.set_alpha(100)
-	s.fill(p.Color("pink"))
-	screen.blit(s, (startCol * SQ_SIZE, startRow * SQ_SIZE))
-	screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
+def drawBoard(screen):
+	global colors
+	colors = [p.Color(235, 235, 208), p.Color(119, 148, 85)]
+	for r in range(DIMENTION):
+		for c in range(DIMENTION):
+			color = colors[(r+c)%2]
+			p.draw.rect(screen, color, p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
 
 '''
 For highlighting the correct sq. of selected piece and the squares it can move to
@@ -174,19 +178,21 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 						screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
 
 '''
-draw the squares on the board
+Highlight the last move
 '''
-def drawBoard(screen):
-	global colors
-	colors = [p.Color(235, 235, 208), p.Color(119, 148, 85)]
-	for r in range(DIMENTION):
-		for c in range(DIMENTION):
-			color = colors[(r+c)%2]
-			p.draw.rect(screen, color, p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
-
+def highlightLastMove(screen, move):
+	startRow = move.startRow
+	startCol = move.startCol
+	endRow = move.endRow
+	endCol = move.endCol
+	s = p.Surface((SQ_SIZE, SQ_SIZE))
+	s.set_alpha(100)
+	s.fill(p.Color("pink"))
+	screen.blit(s, (startCol * SQ_SIZE, startRow * SQ_SIZE))
+	screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
 
 '''
-draw the pieces on the board using ChessEngine.GameState.board.
+	Draw the pieces on the board using ChessEngine.GameState.board.
 '''
 def drawPieces(screen, board):
 	for r in range(DIMENTION):
@@ -195,6 +201,24 @@ def drawPieces(screen, board):
 			if piece != '--':
 				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
 
+'''
+	Draw the Move Log
+'''
+def drawMoveLog(screen, gs):
+	font = MOVE_LOG_FONT
+	moveLogRect = p.Rect(BOARD_WIDTH, 0, MOVE_LOG_PANNEL_WIDTH, MOVE_LOG_PANNEL_HEIGHT)
+	p.draw.rect(screen, p.Color('black'), moveLogRect)
+	moveLog = gs.moveLog
+	padding = 5
+	verticalPadding = 5
+	for i in range(len(moveLog)):
+		text = moveLog[i].getChessNotation()
+		textObject = font.render(text, True, p.Color('white'))
+		textLocation = p.Rect(moveLogRect.move(padding + (50 if i%2 == 1 else 0), verticalPadding))
+		if i%2 == 1:
+			verticalPadding += 15
+
+		screen.blit(textObject, textLocation)
 
 '''
 Animates the movement of piece
@@ -228,12 +252,14 @@ To wrtie some text in the middle of the screen!
 '''
 def drawEndGameText(screen, text):
 						#  Font Name  Size Bold  Italics
-	font = p.font.SysFont("Helvitica", 32, True, False);
-	textObject = font.render(text, 0, p.Color('Blue'))
-	textLocation = p.Rect(0, 0, WIDTH, HEIGHT).move(WIDTH/2 - textObject.get_width()/2, HEIGHT/2 - textObject.get_height()/2)
+	font = p.font.SysFont('Helvitica', 32, True, False)
+	textObject = font.render(text, 0, p.Color('White'))
+	textLocation = p.Rect(0, 0, BOARD_WIDTH, BOARD_HEIGHT).move(BOARD_WIDTH / 2 - textObject.get_width() / 2, BOARD_HEIGHT / 2 - textObject.get_height() / 2)
 	screen.blit(textObject, textLocation)
-
-
+	textObject = font.render(text, 0, p.Color('Black'))
+	screen.blit(textObject, textLocation.move(2, 2))
+	textObject = font.render(text, 0, p.Color('Blue'))
+	screen.blit(textObject, textLocation.move(4, 4))
 
 if __name__ == '__main__':
 	main()
