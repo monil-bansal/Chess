@@ -208,15 +208,24 @@ def drawMoveLog(screen, gs):
 	font = MOVE_LOG_FONT
 	moveLogRect = p.Rect(BOARD_WIDTH, 0, MOVE_LOG_PANNEL_WIDTH, MOVE_LOG_PANNEL_HEIGHT)
 	p.draw.rect(screen, p.Color('black'), moveLogRect)
-	moveLog = gs.moveLog
-	padding = 5
+	moveLog = []
+	for i in range(0, len(gs.moveLog), 2):
+		moveText = str(i//2 + 1) + ".  " + gs.moveLog[i].getChessNotation()
+		if i < len(gs.moveLog) - 1:
+			moveText += "   " + gs.moveLog[i+1].getChessNotation()
+		moveLog.append(moveText)
+
+	horizontalPadding = 5
 	verticalPadding = 5
+	lineSpacing = 5
 	for i in range(len(moveLog)):
-		text = moveLog[i].getChessNotation()
-		textObject = font.render(text, True, p.Color('white'))
-		textLocation = p.Rect(moveLogRect.move(padding + (50 if i%2 == 1 else 0), verticalPadding))
-		if i%2 == 1:
-			verticalPadding += 15
+		textObject = font.render(moveLog[i], True, p.Color('white'))
+		if(verticalPadding + textObject.get_height() >= (MOVE_LOG_PANNEL_HEIGHT - 1)):
+		# if i > 1
+			verticalPadding = 5
+			horizontalPadding += 100
+		textLocation = p.Rect(moveLogRect.move(horizontalPadding, verticalPadding))
+		verticalPadding += textObject.get_height() + lineSpacing
 
 		screen.blit(textObject, textLocation)
 
