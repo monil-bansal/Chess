@@ -201,8 +201,10 @@ def animateMove(move, screen, board, clock):
 		endSqaure = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
 		p.draw.rect(screen, color, endSqaure)
 		#draw captured piece back
-		# if move.pieceCaptured != '--':
-			# screen.blit(IMAGES[move.pzieceCaptured], endSqaure)
+		if move.pieceCaptured != '--':
+			if move.enPassant:
+				endSqaure = p.Rect(move.endCol * SQ_SIZE, move.startRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+			screen.blit(IMAGES[move.pieceCaptured], endSqaure)
 		#draw moving piece
 		screen.blit(IMAGES[move.pieceMoved], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 		p.display.flip()
