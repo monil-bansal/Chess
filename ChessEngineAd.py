@@ -49,6 +49,7 @@ class GameState():
 
 		# For Enpassant
 		self.enPassantPossible = ()  # sq. where enpassant capture can happen
+		self.enPassantLogs = [self.enPassantPossible]
 
 		# castling
 		self.currentCastlingRights = CastleRights(True, True, True, True)
@@ -87,6 +88,9 @@ class GameState():
 		else:
 			self.enPassantPossible = ()
 
+		# Updating En Passant Logs
+		self.enPassantLogs.append(self.enPassantPossible)
+
 		# castle Move
 		if move.isCastleMove:
 			if move.endCol < move.startCol:  # Queen side castle
@@ -124,13 +128,11 @@ class GameState():
 
 		# Undo Enpassant Move
 		if move.enPassant:
-			self.board[move.endRow][move.endCol] = '--'
-			self.board[move.startRow][move.endCol] = move.pieceCaptured
-			self.enPassantPossible = (move.endRow, move.endCol)
+			self.board[move.endRow][move.endCol] = '--'		# Removes the pawn which captured
+			self.board[move.startRow][move.endCol] = move.pieceCaptured		# Brings back the piece that was captured
 
-		# UNDO a 2 sq pawn advance
-		if move.pieceMoved[1] == 'P' and abs(move.endRow - move.startRow) == 2:
-			self.enPassantPossible = ()
+		self.enPassantLogs.pop()
+		self.enPassantPossible = self.enPassantLogs[-1]
 
 		# UNDO castling rights:
 		self.castleRightsLog.pop()  # get rid of last Castling right
