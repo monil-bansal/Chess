@@ -374,11 +374,13 @@ class GameState():
 			startRow = 6
 			backRow = 0
 			enemyColor = 'b'
+			kingRow, kingCol = self.whiteKingLocation
 		else:
 			moveAmount = 1
 			startRow = 1
 			backRow = 7
 			enemyColor = 'w'
+			kingRow, kingCol = self.blackKingLocation
 
 		pawnPromotion = False
 
@@ -399,7 +401,30 @@ class GameState():
 						pawnPromotion = True
 					moves.append(Move((r, c), (r + moveAmount, c - 1), self.board, pawnPromotion=pawnPromotion))
 				if (r + moveAmount, c - 1) == self.enPassantPossible:
-					moves.append(Move((r, c), (r + moveAmount, c - 1), self.board, enPassant=True))
+					attackingPiece = blockingPiece = False
+					if kingRow == r:
+						if kingCol < c:		# King is left to the Pawn
+							#inside -> btw king and pawn | outside -> between that pawn and the other border
+							insideRange = range(kingCol + 1, c-1)
+							outsideRange = range(c + 1, 8)
+						else:		# King to the right to the pawn
+							insideRange = range(kingCol - 1, c, -1)
+							outsideRange = range(c - 2, -1, -1)
+						for i in insideRange:
+							if self.board[r][i] != '--':#  Some other piece besides the en-passant pawns -> BLOCKS
+								   # => can't be attacking piece other wise the king would already be in check and this move won't be allowed
+								blockingPiece = True
+								break
+						for i in outsideRange:
+							piece = self.board[r][i]
+							if piece[0] == enemyColor and (piece[1] == 'R' or piece[1] == 'Q'):
+								attackingPiece = True
+								break
+							elif piece != '--':
+								blockingPiece = True
+								break
+					if not attackingPiece or blockingPiece:
+						moves.append(Move((r, c), (r + moveAmount, c - 1), self.board, enPassant=True))
 
 		# capture to right
 		if c + 1 < len(self.board):
@@ -409,7 +434,30 @@ class GameState():
 						pawnPromotion = True
 					moves.append(Move((r, c), (r + moveAmount, c + 1), self.board, pawnPromotion=pawnPromotion))
 				if (r + moveAmount, c + 1) == self.enPassantPossible:
-					moves.append(Move((r, c), (r + moveAmount, c + 1), self.board, enPassant=True))
+					attackingPiece = blockingPiece = False
+					if kingRow == r:
+						if kingCol < c:  # King is left to the Pawn
+							# inside -> btw king and pawn | outside -> between that pawn and the other border
+							insideRange = range(kingCol + 1, c)
+							outsideRange = range(c + 2, 8)
+						else:  # King to the right to the pawn
+							insideRange = range(kingCol - 1, c + 1, -1)
+							outsideRange = range(c - 1, -1, -1)
+						for i in insideRange:
+							if self.board[r][i] != '--':  # Some other piece besides the en-passant pawns -> BLOCKS
+								# => can't be attacking piece other wise the king would already be in check and this move won't be allowed
+								blockingPiece = True
+								break
+						for i in outsideRange:
+							piece = self.board[r][i]
+							if piece[0] == enemyColor and (piece[1] == 'R' or piece[1] == 'Q'):
+								attackingPiece = True
+								break
+							elif piece != '--':
+								blockingPiece = True
+								break
+					if not attackingPiece or blockingPiece:
+						moves.append(Move((r, c), (r + moveAmount, c + 1), self.board, enPassant=True))
 
 	'''
 	Get all possible moves for a Rook located at (r,c) and add the moves to the list.
