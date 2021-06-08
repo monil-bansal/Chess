@@ -29,7 +29,7 @@ def loadImages():
 	pieces = ['bP', 'bR', 'bN', 'bB', 'bQ', 'bK', 'wP', 'wR', 'wN', 'wB', 'wQ', 'wK']
 	for piece in pieces:
 		IMAGES[piece] = p.transform.scale(p.image.load("images/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
-	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn; 
+	# Note: We can access a piece by saying IMAGES['wP'] -> will give white pawn;
  
 '''
 This will be out main driver. It will handle user input and update the graphics.
@@ -60,7 +60,9 @@ def main():
 					location = p.mouse.get_pos()	 # (x,y) position of mouse
 					col = location[0]//SQ_SIZE
 					row = location[1]//SQ_SIZE
-					if(col >= 8): 	# Click out of board (on move log panel) -> do nothing
+					if not playerOne:
+						row, col = blackPerspectiveRow(row, col)
+					if(col >= 8) or col < 0: 	# Click out of board (on move log panel) -> do nothing
 						continue
 					if sqSelected == (row, col): 	# user selected the same sq. twice -> deselect the selecion
 						sqSelected = ()
@@ -69,7 +71,7 @@ def main():
 						sqSelected = (row, col)
 						playerClicks.append(sqSelected)	 # append for both 1st and 2nd click
 						if len(playerClicks) == 2: 	# when 2nd click
-							move = ChessEngine.Move(playerClicks[0],playerClicks[1], gs.board)
+							move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
 							for i in range(len(validMoves)):
 								if move == validMoves[i]:
 									gs.makeMove(validMoves[i])
@@ -109,11 +111,12 @@ def main():
 		if moveMade:
 			if len(gs.moveLog) > 0 and animate:
 				animate = False
-				animateMove(gs.moveLog[-1], screen, gs.board, clock)
+				animateMove(gs.moveLog[-1], screen, gs.board, clock, playerOne)
 			validMoves = gs.getValidMoves()
+
 			moveMade = False
 
-		drawGameState(screen, gs, sqSelected, validMoves)
+		drawGameState(screen, gs, sqSelected, validMoves, playerOne)
 
 		#Print Checkmate
 		if gs.checkMate:
@@ -133,14 +136,21 @@ def main():
 
 
 '''
+Calculate Row for Black's perspective
+'''
+def blackPerspectiveRow(r,c):
+	return (7 - r, 7 - c)
+
+'''
 responsible for all the graphics in the game
 '''
-def drawGameState(screen, gs, selectedSquare, validMoves):
+def drawGameState(screen, gs, selectedSquare, validMoves,whitesPerspective):
 	drawBoard(screen) 	#draw squares on board (should be called before drawing anything else)
-	highlightSquares(screen, gs, selectedSquare, validMoves)
+	highlightSquares(screen, gs, selectedSquare, validMoves, whitesPerspective)
+	highlightCheck(screen, gs, whitesPerspective)
 	if len(gs.moveLog) > 0:
-		highlightLastMove(screen, gs.moveLog[-1])
-	drawPieces(screen, gs.board) 	#draw pieces on the board
+		highlightLastMove(screen, gs.moveLog[-1], whitesPerspective)
+	drawPieces(screen, gs.board, whitesPerspective) 	#draw pieces on the board
 	drawMoveLog(screen, gs)
 '''
 draw the squares on the board
@@ -150,15 +160,31 @@ def drawBoard(screen):
 	colors = [p.Color(235, 235, 208), p.Color(119, 148, 85)]
 	for r in range(DIMENTION):
 		for c in range(DIMENTION):
-			color = colors[(r+c)%2]
+			color = colors[(r+c) % 2]
 			p.draw.rect(screen, color, p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
+
+'''
+Highlight Check
+'''
+def highlightCheck(screen, gs, whitesPerspective):
+	if gs.inCheck:
+		r,  c = gs.whiteKingLocation if gs.whiteToMove else gs.blackKingLocation
+		if not whitesPerspective:
+			r, c = blackPerspectiveRow(r, c)
+		s = p.Surface((SQ_SIZE, SQ_SIZE))
+		s.set_alpha(100)  # transparency value -> 0 : 100% transparent | 255 : 100% Opaque
+		s.fill(p.Color('red'))
+		screen.blit(s, (c * SQ_SIZE, r * SQ_SIZE))
 
 '''
 For highlighting the correct sq. of selected piece and the squares it can move to
 '''
-def highlightSquares(screen, gs, selectedSquare, validMoves):
+def highlightSquares(screen, gs, selectedSquare, validMoves, whitesPerspective):
 	if selectedSquare != ():
 		r, c = selectedSquare
+		r1, c1 = r, c
+		if not whitesPerspective:
+			r1, c1 = blackPerspectiveRow(r, c)
 		enemyColor = 'b' if gs.whiteToMove else 'w'
 		allyColor = 'w' if gs.whiteToMove else 'b'
 		if gs.board[r][c][0] == allyColor:
@@ -166,25 +192,32 @@ def highlightSquares(screen, gs, selectedSquare, validMoves):
 			s = p.Surface((SQ_SIZE, SQ_SIZE))
 			s.set_alpha(100)		# transparency value -> 0 : 100% transparent | 255 : 100% Opaque
 			s.fill(p.Color('blue'))
-			screen.blit(s, (c*SQ_SIZE, r*SQ_SIZE))
+			screen.blit(s, (c1*SQ_SIZE, r1*SQ_SIZE))
 
 			#Highlighting the valid move squares
 			s.fill(p.Color('yellow'))
+
 			for move in validMoves:
 				if move.startRow == r and move.startCol == c:
 					endRow = move.endRow
 					endCol = move.endCol
+					drawEndRow, drawEndCol = endRow, endCol
+					if not whitesPerspective:
+						drawEndRow, drawEndCol = blackPerspectiveRow(endRow, endCol)
 					if gs.board[endRow][endCol] == '--' or gs.board[endRow][endCol][0] == enemyColor:
-						screen.blit(s, (endCol * SQ_SIZE, endRow * SQ_SIZE))
+						screen.blit(s, (drawEndCol * SQ_SIZE, drawEndRow * SQ_SIZE))
 
 '''
 Highlight the last move
 '''
-def highlightLastMove(screen, move):
+def highlightLastMove(screen, move, whitesPerspective):
 	startRow = move.startRow
 	startCol = move.startCol
 	endRow = move.endRow
 	endCol = move.endCol
+	if not whitesPerspective:
+		startRow, startCol = blackPerspectiveRow(startRow, startCol)
+		endRow, endCol = blackPerspectiveRow(endRow, endCol)
 	s = p.Surface((SQ_SIZE, SQ_SIZE))
 	s.set_alpha(100)
 	s.fill(p.Color("pink"))
@@ -194,12 +227,15 @@ def highlightLastMove(screen, move):
 '''
 	Draw the pieces on the board using ChessEngine.GameState.board.
 '''
-def drawPieces(screen, board):
+def drawPieces(screen, board, whitesPerspective):
 	for r in range(DIMENTION):
 		for c in range(DIMENTION):
-			piece = board[r][c]
+			r1, c1 = r, c
+			if not whitesPerspective:
+				r1, c1 = blackPerspectiveRow(r, c)
+			piece = board[r1][c1]
 			if piece != '--':
-				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
+				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE*c, SQ_SIZE*r, SQ_SIZE, SQ_SIZE))
 
 '''
 	Draw the Move Log
@@ -232,24 +268,31 @@ def drawMoveLog(screen, gs):
 '''
 Animates the movement of piece
 '''
-def animateMove(move, screen, board, clock):
+def animateMove(move, screen, board, clock, whitesPerspective):
 	global colors
 	dR = move.endRow - move.startRow
 	dC = move.endCol - move.startCol
 	framesPerSquare = 3		# frames to move 1 square
 	frameCount = (abs(dR) + abs(dC)) * framesPerSquare
+	drawEndRow, drawEndCol = move.endRow, move.endCol
+	drawStartRow, drawStartCol = move.startRow, move.startCol
+	if not whitesPerspective:
+		drawStartRow, drawStartCol = blackPerspectiveRow(move.startRow, move.startCol)
+		drawEndRow, drawEndCol = blackPerspectiveRow(move.endRow, move.endCol)
 	for frame in range(frameCount + 1):
 		r, c = (move.startRow + dR*frame/frameCount, move.startCol + dC*frame/frameCount)
+		if not whitesPerspective:
+			r, c = blackPerspectiveRow(r, c)
 		drawBoard(screen)
-		drawPieces(screen, board)
+		drawPieces(screen, board, whitesPerspective)
 		#erase piece from endRow, endCol
-		color = colors[(move.endRow + move.endCol) % 2]
-		endSqaure = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+		color = colors[(drawEndRow + drawEndCol) % 2]
+		endSqaure = p.Rect(drawEndCol * SQ_SIZE, drawEndRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
 		p.draw.rect(screen, color, endSqaure)
 		#draw captured piece back
 		if move.pieceCaptured != '--':
 			if move.enPassant:
-				endSqaure = p.Rect(move.endCol * SQ_SIZE, move.startRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+				endSqaure = p.Rect(drawEndCol * SQ_SIZE, drawStartRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
 			screen.blit(IMAGES[move.pieceCaptured], endSqaure)
 		#draw moving piece
 		screen.blit(IMAGES[move.pieceMoved], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
