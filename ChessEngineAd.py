@@ -4,6 +4,7 @@ This is responsible for:
 	- determining the valid moves 
 	- will keep a move log (for doing undo  and look back into current game) 
 """
+import config
 
 
 class GameState():
@@ -75,7 +76,10 @@ class GameState():
 
 		# Pawn Promotion
 		if move.pawnPromotion:
-			promotedPiece = input("Enter your choice to Promote : Q, R, B or N : ")
+			if (self.whiteToMove and config.PLAYER_ONE_HUMAN) or (not self.whiteToMove and config.PLAYER_TWO_HUMAN):
+				promotedPiece = input("Enter your choice to Promote : Q, R, B or N : ")
+			else:
+				promotedPiece = 'Q'
 			self.board[move.endRow][move.endCol] = move.pieceMoved[0] + promotedPiece
 
 		# En-Passant
