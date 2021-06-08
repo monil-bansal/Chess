@@ -46,11 +46,11 @@ def main():
 	animate = False		 				# Flag variable to note when we should animate the piece movement
 	sqSelected = ()		 				# no sq is selected initially, keep track of the last click by the user -> (tuple : (row,col))
 	playerClicks = []					# contains players clicks => [(6,4),(4,4)]  -> pawn at (6,4) moved 2 steps up on (4,4)
-	playerOne = True					# if Human is playing white -> this will be true
-	playerTwo = False					# if Human is playing black -> this will be true
+	playerOne = False					# if Human is playing white -> this will be true
+	playerTwo = True					# if Human is playing black -> this will be true
 	gameOver = False					# True in case of Checkmate and Stalemate
 	while running:
-		humanTurn = not (gs.whiteToMove ^ playerOne)
+		humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
 		for e in p.event.get():
 			if e.type == p.QUIT:
 				running = False
