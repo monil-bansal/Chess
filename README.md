@@ -17,7 +17,7 @@
 
 --------
 
-## To choose whether to play a 2 player game or vs Computer or just see Computer Playing against itself make the following changes in the Config File:
+#### To choose whether to play a 2 player game or vs Computer or just see Computer Playing against itself make the following changes in the Config File:
  
   - For Playing as White (Default)       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     : Set PLAYER_ONE_HUMAN = True and PLAYER_TWO_HUMAN = False
   
