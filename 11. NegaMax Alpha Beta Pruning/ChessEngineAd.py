@@ -13,6 +13,17 @@ class GameState():
 		# - lower case (b/w) as color
 		# - upper case (R,N,B,Q,K or P) as piece name
 		# in case the cell is empty then we store '--'
+
+		#	BOARD FOR CHECKMATE IN 1
+		# self.board = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
+		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
+		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
+		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
+		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
+		# 			  ['bR', '--', '--', '--', '--', '--', '--', '--'],
+		# 			  ['--', '--', '--', '--', '--', '--', '--', 'wK']]
+
 		self.board = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
 					  ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
 					  ['--', '--', '--', '--', '--', '--', '--', '--'],
@@ -85,7 +96,7 @@ class GameState():
 				self.board[move.endRow][7] = '--'
 				self.board[move.endRow][move.endCol - 1] = move.pieceMoved[0] + 'R'
 
-		# Update Castling Rights
+		# Update 7. Castling Rights
 		self.updateCastlingRights(move)
 		newCastleRights = CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.wqs,
 									   self.currentCastlingRights.bks, self.currentCastlingRights.bqs)
@@ -122,7 +133,7 @@ class GameState():
 			self.enPassantPossible = ()
 
 		# UNDO castling rights:
-		self.castleRightsLog.pop()  # get rid of last Castling right
+		self.castleRightsLog.pop()  # get rid of last 7. Castling right
 		self.currentCastlingRights.wks = self.castleRightsLog[-1].wks  # update current castling right
 		self.currentCastlingRights.wqs = self.castleRightsLog[-1].wqs  # update current castling right
 		self.currentCastlingRights.bks = self.castleRightsLog[-1].bks  # update current castling right
@@ -137,8 +148,13 @@ class GameState():
 				self.board[move.endRow][move.endCol - 1] = '--'
 				self.board[move.endRow][7] = move.pieceMoved[0] + 'R'
 
+		# Set checkmate and stalemate false again
+		self.checkMate = False
+		self.staleMate = False
+
+
 	'''
-	   Updating Castling Right given a Move -> -> when it's a Rook or a King Move
+	   Updating 7. Castling Right given a Move -> -> when it's a Rook or a King Move
 	   '''
 
 	def updateCastlingRights(self, move):
@@ -177,10 +193,6 @@ class GameState():
 			kingRow = self.blackKingLocation[0]
 			kingCol = self.blackKingLocation[1]
 
-		print(self.inCheck)
-		print(self.checks)
-		print(self.pins)
-
 		if self.inCheck:
 			if len(self.checks) == 1:  # only 1 check -> block check or move king
 				moves = self.getAllPossibleMoves()
@@ -216,20 +228,24 @@ class GameState():
 
 		if len(moves) == 0:
 			if self.inCheck:
+				self.checkMate = True
 				if self.whiteToMove:
 					print("Black Wins")
 				else:
 					print("White Wins")
 			else:
+				self.staleMate = True
 				print("DRAW!! -> Stalemate", end=', ')
 				if self.whiteToMove:
 					print("White Does Not have Moves")
 				else:
 					print("Black Does Not have Moves")
-
+		else:
+			self.staleMate = False
+			self.checkMate = False
 		self.currentCastlingRights = tempCastlingRights
 
-		# get Castling Moves
+		# get 7. Castling Moves
 		self.getCastlingMoves(kingRow, kingCol, moves)
 		return moves
 
@@ -659,11 +675,11 @@ class CastleRights:
 		self.bqs = bqs
 
 	'''
-	Overloading the __str__ function to print the Castling Rights Properly
+	Overloading the __str__ function to print the 7. Castling Rights Properly
 	'''
 
 	def __str__(self):
-		return ("Castling Rights(wk, wq, bk, bq) : " + str(self.wks) + " " + str(self.wqs) + " " + str(
+		return ("7. Castling Rights(wk, wq, bk, bq) : " + str(self.wks) + " " + str(self.wqs) + " " + str(
 			self.bks) + " " + str(self.bqs))
 
 

@@ -175,7 +175,7 @@ draw the squares on the board
 
 def drawBoard(screen):
     global colors
-    colors = [p.Color(235, 235, 208), p.Color(119, 148, 85)]
+    colors = [config.BOARD_COLOR_LIGHT, config.BOARD_COLOR_DARK]
     for r in range(DIMENTION):
         for c in range(DIMENTION):
             color = colors[(r + c) % 2]
@@ -269,7 +269,7 @@ def drawPieces(screen, board, whitesPerspective):
 
 
 '''
-	Draw the Move Log
+	Draw the 12. Move Log
 '''
 
 

@@ -202,7 +202,7 @@ def drawPieces(screen, board):
 				screen.blit(IMAGES[piece], p.Rect(SQ_SIZE*c, SQ_SIZE*r , SQ_SIZE, SQ_SIZE))
 
 '''
-	Draw the Move Log
+	Draw the 12. Move Log
 '''
 def drawMoveLog(screen, gs):
 	font = MOVE_LOG_FONT

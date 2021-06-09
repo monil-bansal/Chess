@@ -85,7 +85,7 @@ class GameState():
 				self.board[move.endRow][7] = '--'
 				self.board[move.endRow][move.endCol - 1] = move.pieceMoved[0] + 'R'
 
-		# Update Castling Rights
+		# Update 7. Castling Rights
 		self.updateCastlingRights(move)
 		newCastleRights = CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.wqs,
 									   self.currentCastlingRights.bks, self.currentCastlingRights.bqs)
@@ -122,7 +122,7 @@ class GameState():
 			self.enPassantPossible = ()
 
 		# UNDO castling rights:
-		self.castleRightsLog.pop()  # get rid of last Castling right
+		self.castleRightsLog.pop()  # get rid of last 7. Castling right
 		self.currentCastlingRights.wks = self.castleRightsLog[-1].wks  # update current castling right
 		self.currentCastlingRights.wqs = self.castleRightsLog[-1].wqs  # update current castling right
 		self.currentCastlingRights.bks = self.castleRightsLog[-1].bks  # update current castling right
@@ -138,7 +138,7 @@ class GameState():
 				self.board[move.endRow][7] = move.pieceMoved[0] + 'R'
 
 	'''
-	   Updating Castling Right given a Move -> -> when it's a Rook or a King Move
+	   Updating 7. Castling Right given a Move -> -> when it's a Rook or a King Move
 	   '''
 
 	def updateCastlingRights(self, move):
@@ -227,7 +227,7 @@ class GameState():
 
 		self.currentCastlingRights = tempCastlingRights
 
-		# get Castling Moves
+		# get 7. Castling Moves
 		self.getCastlingMoves(kingRow, kingCol, moves)
 		return moves
 
@@ -657,11 +657,11 @@ class CastleRights:
 		self.bqs = bqs
 
 	'''
-	Overloading the __str__ function to print the Castling Rights Properly
+	Overloading the __str__ function to print the 7. Castling Rights Properly
 	'''
 
 	def __str__(self):
-		return ("Castling Rights(wk, wq, bk, bq) : " + str(self.wks) + " " + str(self.wqs) + " " + str(
+		return ("7. Castling Rights(wk, wq, bk, bq) : " + str(self.wks) + " " + str(self.wqs) + " " + str(
 			self.bks) + " " + str(self.bqs))
 
 

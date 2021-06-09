@@ -13,17 +13,6 @@ class GameState():
 		# - lower case (b/w) as color
 		# - upper case (R,N,B,Q,K or P) as piece name
 		# in case the cell is empty then we store '--'
-
-		#	BOARD FOR CHECKMATE IN 1
-		# self.board = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
-		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
-		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
-		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
-		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
-		# 			  ['--', '--', '--', '--', '--', '--', '--', '--'],
-		# 			  ['bR', '--', '--', '--', '--', '--', '--', '--'],
-		# 			  ['--', '--', '--', '--', '--', '--', '--', 'wK']]
-
 		self.board = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
 					  ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
 					  ['--', '--', '--', '--', '--', '--', '--', '--'],
@@ -49,7 +38,6 @@ class GameState():
 
 		# For Enpassant
 		self.enPassantPossible = ()  # sq. where enpassant capture can happen
-		self.enPassantLogs = [self.enPassantPossible]
 
 		# castling
 		self.currentCastlingRights = CastleRights(True, True, True, True)
@@ -88,9 +76,6 @@ class GameState():
 		else:
 			self.enPassantPossible = ()
 
-		# Updating En Passant Logs
-		self.enPassantLogs.append(self.enPassantPossible)
-
 		# castle Move
 		if move.isCastleMove:
 			if move.endCol < move.startCol:  # Queen side castle
@@ -100,7 +85,7 @@ class GameState():
 				self.board[move.endRow][7] = '--'
 				self.board[move.endRow][move.endCol - 1] = move.pieceMoved[0] + 'R'
 
-		# Update Castling Rights
+		# Update 7. Castling Rights
 		self.updateCastlingRights(move)
 		newCastleRights = CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.wqs,
 									   self.currentCastlingRights.bks, self.currentCastlingRights.bqs)
@@ -128,14 +113,16 @@ class GameState():
 
 		# Undo Enpassant Move
 		if move.enPassant:
-			self.board[move.endRow][move.endCol] = '--'		# Removes the pawn which captured
-			self.board[move.startRow][move.endCol] = move.pieceCaptured		# Brings back the piece that was captured
+			self.board[move.endRow][move.endCol] = '--'
+			self.board[move.startRow][move.endCol] = move.pieceCaptured
+			self.enPassantPossible = (move.endRow, move.endCol)
 
-		self.enPassantLogs.pop()
-		self.enPassantPossible = self.enPassantLogs[-1]
+		# UNDO a 2 sq pawn advance
+		if move.pieceMoved[1] == 'P' and abs(move.endRow - move.startRow) == 2:
+			self.enPassantPossible = ()
 
 		# UNDO castling rights:
-		self.castleRightsLog.pop()  # get rid of last Castling right
+		self.castleRightsLog.pop()  # get rid of last 7. Castling right
 		self.currentCastlingRights.wks = self.castleRightsLog[-1].wks  # update current castling right
 		self.currentCastlingRights.wqs = self.castleRightsLog[-1].wqs  # update current castling right
 		self.currentCastlingRights.bks = self.castleRightsLog[-1].bks  # update current castling right
@@ -150,17 +137,11 @@ class GameState():
 				self.board[move.endRow][move.endCol - 1] = '--'
 				self.board[move.endRow][7] = move.pieceMoved[0] + 'R'
 
-		# Set checkmate and stalemate false again
-		self.checkMate = False
-		self.staleMate = False
-
-
 	'''
-	   Updating Castling Right given a Move -> -> when it's a Rook or a King Move
+	   Updating 7. Castling Right given a Move -> -> when it's a Rook or a King Move
 	   '''
 
 	def updateCastlingRights(self, move):
-		# IF KING OR ROOK IS MOVED
 		if move.pieceMoved == 'wK':
 			self.currentCastlingRights.wqs = False
 			self.currentCastlingRights.wks = False
@@ -181,20 +162,6 @@ class GameState():
 			if move.startRow == 0 and move.startCol == 7:
 				self.currentCastlingRights.bks = False
 
-		# IF ROOK IS CAPTURED
-		if move.pieceCaptured == 'wR':
-			if move.endRow == 7:
-				if move.endCol == 0:
-					self.currentCastlingRights.wqs = False
-				elif move.endCol == 7:
-					self.currentCastlingRights.wks = False
-		if move.pieceCaptured == 'bR':
-			if move.endRow == 0:
-				if move.endCol == 0:
-					self.currentCastlingRights.bqs = False
-				elif move.endCol == 7:
-					self.currentCastlingRights.bks = False
-
 	''' 
 	Get a list of all the valid moves -> the moves that user can actually make. => Considering CHECKS.
 	'''
@@ -209,6 +176,10 @@ class GameState():
 		else:
 			kingRow = self.blackKingLocation[0]
 			kingCol = self.blackKingLocation[1]
+
+		print(self.inCheck)
+		print(self.checks)
+		print(self.pins)
 
 		if self.inCheck:
 			if len(self.checks) == 1:  # only 1 check -> block check or move king
@@ -245,24 +216,20 @@ class GameState():
 
 		if len(moves) == 0:
 			if self.inCheck:
-				self.checkMate = True
 				if self.whiteToMove:
 					print("Black Wins")
 				else:
 					print("White Wins")
 			else:
-				self.staleMate = True
 				print("DRAW!! -> Stalemate", end=', ')
 				if self.whiteToMove:
 					print("White Does Not have Moves")
 				else:
 					print("Black Does Not have Moves")
-		else:
-			self.staleMate = False
-			self.checkMate = False
+
 		self.currentCastlingRights = tempCastlingRights
 
-		# get Castling Moves
+		# get 7. Castling Moves
 		self.getCastlingMoves(kingRow, kingCol, moves)
 		return moves
 
@@ -692,11 +659,11 @@ class CastleRights:
 		self.bqs = bqs
 
 	'''
-	Overloading the __str__ function to print the Castling Rights Properly
+	Overloading the __str__ function to print the 7. Castling Rights Properly
 	'''
 
 	def __str__(self):
-		return ("Castling Rights(wk, wq, bk, bq) : " + str(self.wks) + " " + str(self.wqs) + " " + str(
+		return ("7. Castling Rights(wk, wq, bk, bq) : " + str(self.wks) + " " + str(self.wqs) + " " + str(
 			self.bks) + " " + str(self.bqs))
 
 
