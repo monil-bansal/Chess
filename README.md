@@ -1,4 +1,10 @@
+
+
 # Chess
+
+
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/31930832/121518639-589d7880-ca0e-11eb-9dd8-2b06dc1378ee.gif)
+
 
 ### Files : 
   1) ChessMain.py: Contains the code to handle user input and draw the game visuals
